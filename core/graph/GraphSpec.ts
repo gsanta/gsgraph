@@ -49,7 +49,7 @@ describe('Graph', function() {
             graph = graph.addConnection(node1, node2);
 
             var parent = graph.getParent(node2);
-            var ancestors = graph.getAncestors(node2);
+            var ancestors = graph.getParents(node2);
 
             expect(parent).toEqual(node1);
             expect(ancestors.size).toEqual(1);
@@ -122,7 +122,7 @@ describe('Graph', function() {
             graph = graph.removeNode(node1);
 
             var parent = graph.getParent(node2);
-            var ancestors = graph.getAncestors(node2);
+            var ancestors = graph.getParents(node2);
 
             expect(parent).toEqual(null);
             expect(ancestors.size).toEqual(0);
@@ -162,8 +162,8 @@ describe('Graph', function() {
 
             graph = graph.removeConnection(node2, node1);
 
-            expect(graph.getAncestors(node1).size).toEqual(1);
-            expect(graph.getAncestors(node1).get(0)).toEqual(node3);
+            expect(graph.getParents(node1).size).toEqual(1);
+            expect(graph.getParents(node1).get(0)).toEqual(node3);
         });
     });
 });

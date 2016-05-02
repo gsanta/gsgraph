@@ -7,9 +7,9 @@ export interface Node {
 export class Graph {
     private nodes: List<Node>;
     private children: Map<number, List<Node>>;
-    private ancestors: Map<number, List<Node>>;
+    private parents: Map<number, List<Node>>;
 
-    constructor(nodes?: List<Node>, children?: Map<number, List<Node>>, ancestors?: Map<number, List<Node>>) {
+    constructor(nodes?: List<Node>, children?: Map<number, List<Node>>, parents?: Map<number, List<Node>>) {
         if (!nodes) {
             nodes = List<Node>();
         }
@@ -18,64 +18,64 @@ export class Graph {
             children = Map<number, List<Node>>();
         }
 
-        if (!ancestors) {
-            ancestors = Map<number, List<Node>>();
+        if (!parents) {
+            parents = Map<number, List<Node>>();
         }
 
         this.nodes = nodes;
         this.children = children;
-        this.ancestors = ancestors;
+        this.parents = parents;
     }
 
     addNode(node: any) {
         var nodes = this.nodes.push(node);
         var children = this.children.set(node.id, List<any>());
-        var ancestors = this.ancestors.set(node.id, List<any>());
+        var parents = this.parents.set(node.id, List<any>());
 
-        return new Graph(nodes, children, ancestors);
+        return new Graph(nodes, children, parents);
     }
 
     addConnection(parent: any, child: any, index?: number) {
         var children = this.addChild(parent, child, index);
-        var ancestors = this.addAncestor(parent, child);
+        var parents = this.addAncestor(parent, child);
 
-        return new Graph(this.nodes, children, ancestors);
+        return new Graph(this.nodes, children, parents);
     }
 
     removeNode(node: any) {
         var nodesAll = this.nodes.filter(n => n !== node).toList();
-        var ancestorsAll: Map<number, List<Node>> = this.ancestors;
+        var parentsAll: Map<number, List<Node>> = this.parents;
         var childrenAll: Map<number, List<Node>> = this.children;
 
-        var ancestors = ancestorsAll.get(node.id);
+        var parents = parentsAll.get(node.id);
 
-        ancestors.forEach((parent) => {
+        parents.forEach((parent) => {
             var children = childrenAll.get(parent.id);
             children = children.filter((child) => child !== node).toList();
             childrenAll = childrenAll.set(parent.id, children);
         });
-        ancestorsAll = ancestorsAll.set(node.id, List<any>());
+        parentsAll = parentsAll.set(node.id, List<any>());
 
         var children = childrenAll.get(node.id);
 
         children.forEach((child) => {
-            var ancestors = ancestorsAll.get(child.id);
-            ancestors = ancestors.filter((ancestor) => ancestor !== node).toList();
-            ancestorsAll = ancestorsAll.set(child.id, ancestors);
+            var parents = parentsAll.get(child.id);
+            parents = parents.filter((ancestor) => ancestor !== node).toList();
+            parentsAll = parentsAll.set(child.id, parents);
         });
 
         childrenAll = childrenAll.remove(node.id);
 
-        return new Graph(nodesAll, childrenAll, ancestorsAll);
+        return new Graph(nodesAll, childrenAll, parentsAll);
     }
 
     removeConnection(parent: any, child: any) {
-        var ancestors = this.ancestors.get(child.id);
-        var ancestorsAll = this.ancestors.set(child.id, ancestors.filter(ancestor => ancestor !== parent).toList());
+        var parents = this.parents.get(child.id);
+        var parentsAll = this.parents.set(child.id, parents.filter(ancestor => ancestor !== parent).toList());
         var children = this.children.get(parent.id);
         var childrenAll = this.children.set(parent.id, children.filter(ch => ch !== child).toList());
 
-        return new Graph(this.nodes, childrenAll, ancestorsAll);
+        return new Graph(this.nodes, childrenAll, parentsAll);
     }
 
     getChildren(node: any) {
@@ -83,17 +83,17 @@ export class Graph {
     }
 
     getParent(node: any) {
-        var ancestors = this.ancestors.get(node.id);
+        var parents = this.parents.get(node.id);
 
-        if (ancestors.size === 0) {
+        if (parents.size === 0) {
             return null;
         }
 
-        return ancestors.get(0);
+        return parents.get(0);
     }
 
-    getAncestors(node: any) {
-        return this.ancestors.get(node.id);
+    getParents(node: any) {
+        return this.parents.get(node.id);
     }
 
     getNodes(filter: (node: any) => boolean) {
@@ -119,7 +119,7 @@ export class Graph {
     }
 
     private addAncestor(parent: any, child: any) {
-        var list: List<any> = this.ancestors.get(child.id);
-        return this.ancestors.set(child.id, list.push(parent));
+        var list: List<any> = this.parents.get(child.id);
+        return this.parents.set(child.id, list.push(parent));
     }
 }
